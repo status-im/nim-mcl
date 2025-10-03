@@ -1,0 +1,3 @@
+[submodule "vendor/mcl"]
+	path = vendor/mcl
+	url = https://github.com/herumi/mcl
