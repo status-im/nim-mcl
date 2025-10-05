@@ -12,6 +12,10 @@
 import
   ./backend
 
+export
+  mclSize,
+  mclInt
+
 {.pragma: importbn, importc, header: headerPath & "/mcl/bn.h", gcsafe, raises:[].}
 {.pragma: bnheader, header: headerPath & "/mcl/bn.h".}
 
