@@ -13,7 +13,8 @@ import
   std/os
 
 const
-  basePath* = currentSourcePath.parentDir.parentDir & "/vendor/mcl"
+  projectPath* = currentSourcePath.parentDir.parentDir
+  basePath* = projectPath & "/vendor/mcl"
   headerPath* = basePath & "/include"
   srcPath* = basePath & "/src"
 

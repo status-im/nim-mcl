@@ -6,20 +6,14 @@
 # at your option.
 # This file may not be copied, modified, or distributed except according to
 # those terms
-
-{.emit: """
-#ifndef __cplusplus
-  /* Map bare name to struct tag so C accepts prototypes like 'const ecdsaPrecomputedPublicKey *' */
-  #ifndef ecdsaPrecomputedPublicKey
-    #define ecdsaPrecomputedPublicKey struct ecdsaPrecomputedPublicKey
-  #endif
-#endif
-""".}
-
 {.push raises: [].}
 
 import
   ./backend
+
+export
+  mclSize,
+  mclInt
 
 # ---- FFI pragmas -----------------------------------------------------------
 {.pragma: ecdsaimport, importc, header: headerPath & "/mcl/ecdsa.h", gcsafe, raises:[].}
@@ -29,9 +23,6 @@ import
 # These follow the fixed sizes in the header: 4*64-bit limbs for scalars,
 # public key is 3 * 4 limbs (Jacobian XYZ), signature is 2 * 4 limbs (r,s).
 type
-  mclSize* = csize_t
-  mclInt*  = int64
-
   EcdsaSecretKey* {.importc: "ecdsaSecretKey", ecdsaheader.} = object
     d* {.importc: "d".}: array[4, uint64]
 
@@ -40,10 +31,6 @@ type
 
   EcdsaSignature* {.importc: "ecdsaSignature", ecdsaheader.} = object
     d* {.importc: "d".}: array[4 * 2, uint64]  # (r, s)
-
-# Opaque precomputed pubkey handle
-type
-  EcdsaPrecomputedPublicKey* = distinct pointer
 
 # ---- Library init & options -----------------------------------------------
 proc ecdsaInit*(): cint {.ecdsaimport.}
@@ -75,9 +62,3 @@ proc ecdsaNormalizeSignature*(sig: ptr EcdsaSignature) {.ecdsaimport.}
 
 # Verify only accepts low-S signatures
 proc ecdsaVerify*(sig: ptr EcdsaSignature, pub: ptr EcdsaPublicKey, m: pointer, size: mclSize): cint {.ecdsaimport.}
-
-# ---- Precomputed public key accel -----------------------------------------
-proc ecdsaPrecomputedPublicKeyCreate*(): EcdsaPrecomputedPublicKey {.ecdsaimport.}
-proc ecdsaPrecomputedPublicKeyDestroy*(ppub: EcdsaPrecomputedPublicKey) {.ecdsaimport.}
-proc ecdsaPrecomputedPublicKeyInit*(ppub: EcdsaPrecomputedPublicKey, pub: ptr EcdsaPublicKey): cint {.ecdsaimport.}
-proc ecdsaVerifyPrecomputed*(sig: ptr EcdsaSignature, ppub: EcdsaPrecomputedPublicKey, m: pointer, size: mclSize): cint {.ecdsaimport.}
