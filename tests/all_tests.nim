@@ -15,14 +15,19 @@ import
 
 doAssert(mclBn_init(MCL_BN_SNARK1, MCLBN_COMPILED_TIME_VAR) == 0.cint, "FAILED TO EXECUTE mclBn_Init")
 
-# doAssert ecdsaInit() == 0
+doAssert ecdsaInit() == 0
 # discard ecdsaSetSerializeMode(1) # bitcoin-compatible
 
 var sk: EcdsaSecretKey
 doAssert ecdsaSecretKeySetByCSPRNG(addr sk) == 0
 
-# var pk: EcdsaPublicKey
-# ecdsaGetPublicKey(addr pk, addr sk)
+var pk: EcdsaPublicKey
+ecdsaGetPublicKey(addr pk, addr sk)
+
+var pp = ecdsaPrecomputedPublicKeyCreate()
+doAssert ecdsaPrecomputedPublicKeyInit(pp, pk.addr) == 0
+ecdsaPrecomputedPublicKeyDestroy(pp)
+
 
 # # message as stack bytes (ORC-safe)
 # var msg: array[3, uint8] = [uint8 'f', uint8 'o', uint8 'o']
