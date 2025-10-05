@@ -1,0 +1,126 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency: # Cancel stale PR builds (but not push builds)
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - os: linux
+            cpu: amd64
+            platform: x64
+            builder: ubuntu-22.04
+          - os: linux
+            cpu: arm64
+            platform: arm64
+            builder: ubuntu-22.04-arm
+          - os: windows
+            cpu: amd64
+            platform: x64
+            builder: windows-latest
+          - os: macos
+            cpu: arm64
+            platform: arm64
+            builder: macos-latest
+        branch: ["version-2-2"]
+    defaults:
+      run:
+        shell: bash
+
+    name: '${{ matrix.target.os }}-${{ matrix.target.cpu }} (Nim ${{ matrix.branch }})'
+    runs-on: ${{ matrix.target.builder }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Restore llvm-mingw (Windows) from cache
+        if: runner.os == 'Windows'
+        id: windows-mingw-cache
+        uses: actions/cache@v4
+        with:
+          path: external/mingw-${{ matrix.target.cpu }}
+          key: 'mingw-llvm-21-${{ matrix.target.cpu }}'
+
+      - name: Install llvm-mingw dependency (Windows)
+        if: >
+          steps.windows-mingw-cache.outputs.cache-hit != 'true' &&
+          runner.os == 'Windows'
+        run: |
+          mkdir -p external
+          LLVM_VERSION="20250730"
+          MINGW_BASE="https://github.com/mstorsjo/llvm-mingw/releases/download/$LLVM_VERSION"
+          MINGW_URL="$MINGW_BASE/llvm-mingw-$LLVM_VERSION-ucrt-x86_64.zip"
+          curl -L "$MINGW_URL" -o "external/mingw-${{ matrix.target.cpu }}.zip"
+          7z x -y "external/mingw-${{ matrix.target.cpu }}.zip" -oexternal/mingw-${{ matrix.target.cpu }}/
+          mv external/mingw-${{ matrix.target.cpu }}/**/* ./external/mingw-${{ matrix.target.cpu }}
+
+      - name: Restore Nim DLLs dependencies (Windows) from cache
+        if: runner.os == 'Windows'
+        id: windows-dlls-cache
+        uses: actions/cache@v4
+        with:
+          path: external/dlls-${{ matrix.target.cpu }}
+          key: 'dlls-${{ matrix.target.cpu }}'
+
+      - name: Install DLLs dependencies (Windows)
+        if: >
+          runner.os == 'Windows' &&
+          steps.windows-dlls-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p external
+          curl -L "https://nim-lang.org/download/windeps.zip" -o external/windeps.zip
+          7z x -y external/windeps.zip -oexternal/dlls-${{ matrix.target.cpu }}
+
+      - name: Path to cached dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "${{ github.workspace }}/external/mingw-${{ matrix.target.cpu }}/bin" >> $GITHUB_PATH
+          echo "${{ github.workspace }}/external/dlls-${{ matrix.target.cpu }}" >> $GITHUB_PATH
+
+      - name: Restore prebuilt Nim from cache
+        if: inputs.nim-cache == 'true'
+        id: nim-cache
+        uses: actions/cache@v4
+        with:
+          path: NimBinCache
+          key: 'nim-${{ matrix.os }}-${{ matrix.cpu }}'
+
+      - name: Build Nim and Nimble
+        env:
+          MAKE: make -j4
+          ARCH_OVERRIDE: ${{ matrix.target.platform }}
+          NIM_COMMIT: ${{ matrix.branch }}
+          QUICK_AND_DIRTY_COMPILER: 1
+          QUICK_AND_DIRTY_NIMBLE: 1
+          CC: gcc
+        run: |
+          curl -O -L -s -S https://raw.githubusercontent.com/status-im/nimbus-build-system/master/scripts/build_nim.sh
+          bash build_nim.sh nim csources dist/nimble NimBinCache
+          echo '${{ github.workspace }}/nim/bin' >> $GITHUB_PATH
+
+      - name: Run tests
+        env:
+          PLATFORM: ${{ matrix.target.platform }}
+        run: |
+          nim --version
+          nimble --version
+          gcc --version
+          nimble install -y --depsOnly
+          if [[ '${{ matrix.target.cpu }}' == 'arm64' ]]; then
+            env NIMFLAGS="--cc:clang" nimble test
+          else
+            nimble test
+          fi
