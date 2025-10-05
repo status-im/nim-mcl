@@ -20,15 +20,24 @@ const
 const
   MCL_FP_BIT* = 384
   MCL_FR_BIT* = 256
-  mcl_avx512_enabled* {.booldefine.} = true
+  mcl_avx512_enabled* {.booldefine.} = false
 
 {.passc: "-DMCL_FP_BIT=" & $MCL_FP_BIT.}
 {.passc: "-DMCL_FR_BIT=" & $MCL_FR_BIT.}
 {.passc: "-DCYBOZU_DONT_USE_STRING -DCYBOZU_DONT_USE_EXCEPTION".}
 {.passc: "-I" & headerPath.}
 
-when defined(amd64) and (defined(windows) or defined(linux)) and mcl_avx512_enabled:
-  {.compile(srcPath & "/msm_avx.cpp", "-fno-lto -mavx512f -mavx512ifma -std=c++11").}
+when defined(amd64) and (defined(windows) or defined(linux)):
+  when mcl_avx512_enabled:
+    {.compile(srcPath & "/msm_avx.cpp", "-fno-lto -mavx512f -mavx512ifma -std=c++11").}
+  else:
+    {.passc: "-DMCL_MSM=0".}
+    when defined(windows):
+      # Assume windows using clang
+      {.passc: "-DMCL_USE_LLVM".}
+      {.compile: srcPath & "/base64.ll".}
+    when defined(linux):
+      {.compile: srcPath & "/asm/x86-64.S".}
   when defined(linux):
     {.compile: srcPath & "/asm/bint-x64-amd64.S".}
   when defined(windows):

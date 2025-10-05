@@ -121,9 +121,6 @@ jobs:
           nimble install -y --depsOnly
           if [[ '${{ matrix.target.cpu }}' == 'arm64' ]]; then
             env NIMFLAGS="--cc:clang" nimble test
-          elif [[ '${{ matrix.target.os }}' == 'windows' ]]; then
-            # Github actions windows runner does not support AVX512 instruction!
-            env NIMFLAGS="-d:mcl_avx512_enabled:false" nimble test
           else
             nimble test
           fi
