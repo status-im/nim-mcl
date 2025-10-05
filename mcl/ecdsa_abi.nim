@@ -16,8 +16,8 @@ export
   mclInt
 
 # ---- FFI pragmas -----------------------------------------------------------
-{.pragma: ecdsaimport, importc, header: headerPath & "/mcl/ecdsa.h", gcsafe, raises:[].}
-{.pragma: ecdsaheader, header: headerPath & "/mcl/ecdsa.h".}
+{.pragma: ecdsaimport, importc, header: projectPath & "/mcl/mcl_ecdsa.h", gcsafe, raises:[].}
+{.pragma: ecdsaheader, header: projectPath & "/mcl/mcl_ecdsa.h".}
 
 # ---- Header type mirrors ---------------------------------------------------
 # These follow the fixed sizes in the header: 4*64-bit limbs for scalars,
@@ -62,3 +62,11 @@ proc ecdsaNormalizeSignature*(sig: ptr EcdsaSignature) {.ecdsaimport.}
 
 # Verify only accepts low-S signatures
 proc ecdsaVerify*(sig: ptr EcdsaSignature, pub: ptr EcdsaPublicKey, m: pointer, size: mclSize): cint {.ecdsaimport.}
+
+type
+  EcdsaPrecomputedPublicKeyPtr* {.importc: "struct ecdsaPrecomputedPublicKey*", ecdsaheader.} = pointer
+  
+proc ecdsaPrecomputedPublicKeyCreate*(): EcdsaPrecomputedPublicKeyPtr {.ecdsaimport.}
+proc ecdsaPrecomputedPublicKeyDestroy*(ppub: EcdsaPrecomputedPublicKeyPtr) {.ecdsaimport.}
+proc ecdsaPrecomputedPublicKeyInit*(ppub: EcdsaPrecomputedPublicKeyPtr, pub: ptr EcdsaPublicKey): cint {.ecdsaimport.}
+
