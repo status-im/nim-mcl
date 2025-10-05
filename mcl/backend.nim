@@ -41,6 +41,7 @@ else:
   {.compile: srcPath & "/bint" & $BITS & ".ll".}
 
 {.compile(srcPath & "/fp.cpp", "-fno-lto").}
+{.compile(srcPath & "/ecdsa_c.cpp", "-fno-lto").}
 
 type
   mclSize* = csize_t
