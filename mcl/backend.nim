@@ -33,7 +33,7 @@ when defined(amd64) and (defined(windows) or defined(linux)):
   else:
     {.passc: "-DMCL_MSM=0".}
     when defined(windows):
-      # Assume windows using clang
+      # Assume on Windows using llvm-mingw
       {.passc: "-DMCL_USE_LLVM".}
       {.compile: srcPath & "/base64.ll".}
     when defined(linux):
@@ -41,6 +41,7 @@ when defined(amd64) and (defined(windows) or defined(linux)):
   when defined(linux):
     {.compile: srcPath & "/asm/bint-x64-amd64.S".}
   when defined(windows):
+    # Assume on Windows using llvm-mingw
     {.compile: srcPath & "/asm/bint-x64-mingw.S".}
 else:
   # Requires clang!
