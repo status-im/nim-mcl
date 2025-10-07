@@ -18,9 +18,6 @@ const
   headerPath* = basePath & "/include"
   srcPath* = basePath & "/src"
 
-static:
-  debugEcho "AAA: ", projectPath
-
 const
   MCL_FP_BIT* = 384
   MCL_FR_BIT* = 256
