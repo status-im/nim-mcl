@@ -90,12 +90,21 @@ jobs:
           echo "${{ github.workspace }}/external/mingw-${{ matrix.target.cpu }}/bin" >> $GITHUB_PATH
           echo "${{ github.workspace }}/external/dlls-${{ matrix.target.cpu }}" >> $GITHUB_PATH
 
+      - name: Get latest nimbus-build-system commit hash
+        id: versions
+        run: |
+          getHash() {
+            git ls-remote "https://github.com/$1" "${2:-HEAD}" | cut -f 1
+          }
+          nbsHash=$(getHash status-im/nimbus-build-system)
+          echo "nimbus_build_system=$nbsHash" >> $GITHUB_OUTPUT
+
       - name: Restore prebuilt Nim from cache
         id: nim-cache
         uses: actions/cache@v4
         with:
           path: NimBinCache
-          key: 'nim-${{ matrix.os }}-${{ matrix.cpu }}'
+          key: 'nim-${{ matrix.target.os }}-${{ matrix.target.cpu }}-${{ steps.versions.outputs.nimbus_build_system }}'
 
       - name: Build Nim and Nimble
         env:
