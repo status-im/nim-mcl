@@ -10,13 +10,16 @@
 {.push raises: [].}
 
 import
-  std/os
+  std/[os, strutils]
 
 const
-  projectPath* = currentSourcePath.parentDir.parentDir
+  projectPath* = currentSourcePath.rsplit({DirSep, AltSep}, 2)[0]
   basePath* = projectPath & "/vendor/mcl"
   headerPath* = basePath & "/include"
   srcPath* = basePath & "/src"
+
+static:
+  debugEcho "AAA: ", projectPath
 
 const
   MCL_FP_BIT* = 384
