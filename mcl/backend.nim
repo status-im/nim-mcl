@@ -10,10 +10,10 @@
 {.push raises: [].}
 
 import
-  std/os
+  std/[os, strutils]
 
 const
-  projectPath* = currentSourcePath.parentDir.parentDir
+  projectPath* = currentSourcePath.rsplit({DirSep, AltSep}, 2)[0]
   basePath* = projectPath & "/vendor/mcl"
   headerPath* = basePath & "/include"
   srcPath* = basePath & "/src"
@@ -44,6 +44,10 @@ when defined(amd64) and (defined(windows) or defined(linux)):
   when defined(windows):
     # Assume on Windows using llvm-mingw
     {.compile: srcPath & "/asm/bint-x64-mingw.S".}
+elif defined(arm64) and defined(linux) and defined(gcc):
+  {.passc: "-DMCL_BINT_ASM=1 -DMCL_BINT_ASM_X64=0 -DMCL_USE_LLVM -DMCL_MSM=0".}
+  {.link: projectPath & "/mcl/obj/linux_arm64_base64.o" .}
+  {.link: projectPath & "/mcl/obj/linux_arm64_bint64.o" .}
 else:
   # Requires clang!
   const BITS = sizeof(int) * 8
