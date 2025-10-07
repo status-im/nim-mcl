@@ -91,7 +91,6 @@ jobs:
           echo "${{ github.workspace }}/external/dlls-${{ matrix.target.cpu }}" >> $GITHUB_PATH
 
       - name: Restore prebuilt Nim from cache
-        if: inputs.nim-cache == 'true'
         id: nim-cache
         uses: actions/cache@v4
         with:
@@ -119,8 +118,4 @@ jobs:
           nimble --version
           gcc --version
           nimble install -y --depsOnly
-          if [[ '${{ matrix.target.cpu }}' == 'arm64' ]]; then
-            env NIMFLAGS="--cc:clang" nimble test
-          else
-            nimble test
-          fi
+          nimble test
