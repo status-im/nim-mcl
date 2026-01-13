@@ -154,13 +154,13 @@ static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
     "orq %[t], %%rax\n"
     "orq %[u], %%rax\n"
     "orq %[v], %%rax\n"
-    "jne  mclx_Fp_negL0%=\n"
+    "jne  1f\n"
     "movq  %%rax, (%[y])\n"
     "movq  %%rax, 0x8(%[y])\n"
     "movq  %%rax, 0x10(%[y])\n"
     "movq  %%rax, 0x18(%[y])\n"
-    "jmp  mclx_Fp_negL1%=\n"
-    "mclx_Fp_negL0%=:\n"
+    "jmp  2f\n"
+    "1:\n"
     "leaq %[BN_P], %%rax\n"
     "movq  (%%rax), %%rdx\n"
     "subq  %[s], %%rdx\n"
@@ -174,7 +174,7 @@ static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
     "movq  0x18(%%rax), %%rdx\n"
     "sbbq  %[v], %%rdx\n"
     "movq  %%rdx, 0x18(%[y])\n"
-    "mclx_Fp_negL1%=:\n"
+    "2:\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v)
     : [x] "r" (x), [BN_P] "m" (FP_OP.P)
     : "cc", "memory", "%rax", "%rdx"
@@ -358,13 +358,13 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "orq  %[t], %%rax\n"
     "orq  %[u], %%rax\n"
     "orq  %[v], %%rax\n"
-    "jne   mclx_Fp2_negL0%=\n"
+    "jne 1f\n"
     "movq %%rax, (%[y])\n"
     "movq %%rax, 0x8(%[y])\n"
     "movq %%rax, 0x10(%[y])\n"
     "movq %%rax, 0x18(%[y])\n"
-    "jmp   mclx_Fp2_negL1%=\n"
-    "mclx_Fp2_negL0%=:\n"
+    "jmp 2f\n"
+    "1:\n"
     "leaq %[BN_P], %%rax\n"
     "movq (%%rax), %%rdx\n"
     "subq %[s], %%rdx\n"
@@ -378,7 +378,7 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "movq 0x18(%%rax), %%rdx\n"
     "sbbq %[v], %%rdx\n"
     "movq %%rdx, 0x18(%[y])\n"
-    "mclx_Fp2_negL1%=:\n"
+    "2:\n"
     "movq 0x20(%[x]), %[s]\n"
     "movq 0x28(%[x]), %[t]\n"
     "movq 0x30(%[x]), %[u]\n"
@@ -387,13 +387,13 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "orq  %[t], %%rax\n"
     "orq  %[u], %%rax\n"
     "orq  %[v], %%rax\n"
-    "jne   mclx_Fp2_negL2%=\n"
+    "jne 3f\n"
     "movq %%rax, 0x20(%[y])\n"
     "movq %%rax, 0x28(%[y])\n"
     "movq %%rax, 0x30(%[y])\n"
     "movq %%rax, 0x38(%[y])\n"
-    "jmp   mclx_Fp2_negL3%=\n"
-    "mclx_Fp2_negL2%=:\n"
+    "jmp 4f\n"
+    "3:\n"
     "leaq %[BN_P], %%rax\n"
     "movq (%%rax), %%rdx\n"
     "subq %[s], %%rdx\n"
@@ -407,13 +407,15 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "movq 0x18(%%rax), %%rdx\n"
     "sbbq %[v], %%rdx\n"
     "movq %%rdx, 0x38(%[y])\n"
-    "mclx_Fp2_negL3%=:\n"
+    "4:\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v)
     : [x] "r" (x), [BN_P] "m" (FP_OP.P)
     : "cc", "memory", "%rax", "%rdx"
   );
 }
 
+/*
+Impossible constraint error when compiling on CI
 static void mclx_Fpdbl_sqrPre(_bn_mini_fpdbl* y, const _bn_mini_fp* x) {
   uint64_t s, t, u, v;
   uint64_t z, w, m, n;
@@ -478,6 +480,7 @@ static void mclx_Fpdbl_sqrPre(_bn_mini_fpdbl* y, const _bn_mini_fp* x) {
     : "cc", "memory", "%rax", "%rdx"
   );
 }
+*/
 
 static void mclx_Fpdbl_add(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn_mini_fpdbl* y) {
   uint64_t s, t, u, v;

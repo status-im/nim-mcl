@@ -185,13 +185,13 @@ static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
     "orr  %[w], %[s], %[t]\n"
     "orr  %[w], %[u], %[w]\n"
     "orr  %[w], %[v], %[w]\n"
-    "cbnz %[w], mclx_Fp_negL0%=\n"
+    "cbnz %[w], 1f\n"
 
     "stp  xzr, xzr, [%[y]]\n"
     "stp  xzr, xzr, [%[y], #16]\n"
-    "b mclx_Fp_negL1%=\n"
+    "b 2f\n"
 
-    "mclx_Fp_negL0%=:\n"
+    "1:\n"
     FP_OP_P(m)
     "ldp  %[w], %[z], [%[m]]\n"
     "subs %[s], %[w], %[s]\n"
@@ -203,7 +203,7 @@ static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
     "sbc  %[v], %[z], %[v]\n"
     "stp  %[u], %[v], [%[y], #16]\n"
 
-    "mclx_Fp_negL1%=:\n"
+    "2:\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
       [w] "=&r" (w), [z] "=&r" (z), [m] "=&r" (m)
     : [x] "r" (x)
@@ -419,13 +419,13 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "orr  %[w], %[s], %[t]\n"
     "orr  %[w], %[u], %[w]\n"
     "orr  %[w], %[v], %[w]\n"
-    "cbnz %[w], mclx_Fp2_negL0%=\n"
+    "cbnz %[w], 1f\n"
 
     "stp  xzr, xzr, [%[y]]\n"
     "stp  xzr, xzr, [%[y], #16]\n"
-    "b mclx_Fp2_negL1%=\n"
+    "b 2f\n"
 
-    "mclx_Fp2_negL0%=:\n"
+    "1:\n"
     FP_OP_P(m)
     "ldp %[w], %[z], [%[m]]\n"
     "subs %[s], %[w], %[s]\n"
@@ -437,20 +437,20 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "sbc  %[v], %[z], %[v]\n"
     "stp %[u], %[v], [%[y], #16]\n"
 
-    "mclx_Fp2_negL1%=:\n"
+    "2:\n"
     "ldp  %[s], %[t], [%[x], #32]\n"
     "ldp  %[u], %[v], [%[x], #48]\n"
 
     "orr %[w], %[s], %[t]\n"
     "orr %[w], %[u], %[w]\n"
     "orr %[w], %[v], %[w]\n"
-    "cbnz %[w], mclx_Fp2_negL2%=\n"
+    "cbnz %[w], 3f\n"
 
     "stp  xzr, xzr, [%[y], #32]\n"
     "stp  xzr, xzr, [%[y], #48]\n"
-    "b mclx_Fp2_negL3%=\n"
+    "b 4f\n"
 
-    "mclx_Fp2_negL2%=:\n"
+    "3:\n"
     FP_OP_P(m)
     "ldp %[w], %[z], [%[m]]\n"
     "subs %[s], %[w], %[s]\n"
@@ -462,7 +462,7 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "sbc  %[v], %[z], %[v]\n"
     "stp %[u], %[v], [%[y], #48]\n"
 
-    "mclx_Fp2_negL3%=:\n"
+    "4:\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
       [w] "=&r" (w), [z] "=&r" (z), [m] "=&r" (m)
     : [x] "r" (x)
