@@ -153,28 +153,6 @@ static void bn_swap_2x4_toBE(uint64_t* r, const _bn_mini_g1* a) {
   );
 }
 
-#if defined(__APPLE__) && defined(__arm64__)
-#define FP_OP_P(a) \
-  "adrp %[" #a "], _FP_OP+8@page\n"\
-  "add  %[" #a "], %[" #a "], _FP_OP+8@pageoff\n"
-
-
-#define BN_ZERO_ADDR(a) \
-  "adrp %[" #a "], _BN_ZERO@page\n"\
-  "add  %[" #a "], %[" #a "], _BN_ZERO@pageoff\n"
-
-#else
-
-#define FP_OP_P(a) \
-  "adrp %[" #a "], FP_OP+8\n"\
-  "add  %[" #a "], %[" #a "], :lo12:FP_OP+8\n"
-
-#define BN_ZERO_ADDR(a) \
-  "adrp %[" #a "], BN_ZERO\n"\
-  "add  %[" #a "], %[" #a "], :lo12:BN_ZERO\n"
-
-#endif
-
 static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
   uint64_t s, t, u, v;
   uint64_t w, z, m;
@@ -192,7 +170,6 @@ static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
     "b 2f\n"
 
     "1:\n"
-    FP_OP_P(m)
     "ldp  %[w], %[z], [%[m]]\n"
     "subs %[s], %[w], %[s]\n"
     "sbcs %[t], %[z], %[t]\n"
@@ -205,8 +182,8 @@ static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
 
     "2:\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
-      [w] "=&r" (w), [z] "=&r" (z), [m] "=&r" (m)
-    : [x] "r" (x)
+      [w] "=&r" (w), [z] "=&r" (z)
+    : [x] "r" (x), [m] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
@@ -299,7 +276,6 @@ static void mclx_Fp2_mul2(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "extr %[m], %[u], %[t], #63\n"
     "extr %[n], %[v], %[u], #63\n"
 
-    FP_OP_P(c)
     "ldp %[a], %[b], [%[c]]\n"
     "subs %[s], %[z], %[a]\n"
     "sbcs %[t], %[w], %[b]\n"
@@ -339,8 +315,8 @@ static void mclx_Fp2_mul2(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "stp %[m], %[n], [%[y], #48]\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
       [z] "=&r" (z), [w] "=&r" (w), [m] "=&r" (m), [n] "=&r" (n),
-      [a] "=&r" (a), [b] "=&r" (b), [c] "=&r" (c)
-    : [x] "r" (x)
+      [a] "=&r" (a), [b] "=&r" (b)
+    : [x] "r" (x), [c] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
@@ -426,7 +402,6 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "b 2f\n"
 
     "1:\n"
-    FP_OP_P(m)
     "ldp %[w], %[z], [%[m]]\n"
     "subs %[s], %[w], %[s]\n"
     "sbcs %[t], %[z], %[t]\n"
@@ -451,7 +426,6 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
     "b 4f\n"
 
     "3:\n"
-    FP_OP_P(m)
     "ldp %[w], %[z], [%[m]]\n"
     "subs %[s], %[w], %[s]\n"
     "sbcs %[t], %[z], %[t]\n"
@@ -464,8 +438,8 @@ static void mclx_Fp2_neg(_bn_mini_fp2* y, const _bn_mini_fp2* x) {
 
     "4:\n"
     : [y] "+r" (y), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
-      [w] "=&r" (w), [z] "=&r" (z), [m] "=&r" (m)
-    : [x] "r" (x)
+      [w] "=&r" (w), [z] "=&r" (z)
+    : [x] "r" (x), [m] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
@@ -584,7 +558,6 @@ static void mclx_Fpdbl_add(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn
     "adcs %[u], %[u], %[m]\n"
     "adc  %[v], %[v], %[n]\n"
 
-    FP_OP_P(c)
     "ldp %[a], %[b], [%[c]]\n"
     "subs %[m], %[s], %[a]\n"
     "sbcs %[n], %[t], %[b]\n"
@@ -600,8 +573,8 @@ static void mclx_Fpdbl_add(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn
     "stp %[u], %[v], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
       [m] "=&r" (m), [n] "=&r" (n), [o] "=&r" (o), [p] "=&r" (p),
-      [a] "=&r" (a), [b] "=&r" (b), [c] "=&r" (c)
-    : [x] "r" (x), [y] "r" (y)
+      [a] "=&r" (a), [b] "=&r" (b)
+    : [x] "r" (x), [y] "r" (y), [c] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
@@ -621,7 +594,6 @@ static void mclx_Fp2_add(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_
     "adcs %[u], %[u], %[o]\n"
     "adc  %[v], %[v], %[p]\n"
 
-    FP_OP_P(c)
     "ldp %[a], %[b], [%[c]]\n"
     "subs %[m], %[s], %[a]\n"
     "sbcs %[n], %[t], %[b]\n"
@@ -647,7 +619,6 @@ static void mclx_Fp2_add(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_
     "adcs %[u], %[u], %[o]\n"
     "adc  %[v], %[v], %[p]\n"
 
-    FP_OP_P(c)
     "ldp %[a], %[b], [%[c]]\n"
     "subs %[m], %[s], %[a]\n"
     "sbcs %[n], %[t], %[b]\n"
@@ -664,8 +635,8 @@ static void mclx_Fp2_add(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_
     "stp %[u], %[v], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
       [m] "=&r" (m), [n] "=&r" (n), [o] "=&r" (o), [p] "=&r" (p),
-      [a] "=&r" (a), [b] "=&r" (b), [c] "=&r" (c)
-    : [x] "r" (x), [y] "r" (y)
+      [a] "=&r" (a), [b] "=&r" (b)
+    : [x] "r" (x), [y] "r" (y), [c] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
@@ -676,11 +647,12 @@ static void mclx_Fpdbl_sub(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn
   asm volatile(
     "ldp %[s], %[t], [%[x]]\n"
     "ldp %[u], %[v], [%[x], #16]\n"
-    "ldp %[m], %[n], [%[y]]\n"
-    "ldp %[o], %[p], [%[y], #16]\n"
 
-    "subs %[s], %[s], %[m]\n"
-    "sbcs %[t], %[t], %[n]\n"
+    "ldp %[o], %[p], [%[y]]\n"
+    "subs %[s], %[s], %[o]\n"
+    "sbcs %[t], %[t], %[p]\n"
+
+    "ldp %[o], %[p], [%[y], #16]\n"
     "sbcs %[u], %[u], %[o]\n"
     "sbcs %[v], %[v], %[p]\n"
 
@@ -689,30 +661,29 @@ static void mclx_Fpdbl_sub(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn
 
     "ldp %[s], %[t], [%[x], #32]\n"
     "ldp %[u], %[v], [%[x], #48]\n"
-    "ldp %[m], %[n], [%[y], #32]\n"
-    "ldp %[o], %[p], [%[y], #48]\n"
 
-    "sbcs %[s], %[s], %[m]\n"
-    "sbcs %[t], %[t], %[n]\n"
+    "ldp %[o], %[p], [%[y], #32]\n"
+    "sbcs %[s], %[s], %[o]\n"
+    "sbcs %[t], %[t], %[p]\n"
+
+    "ldp %[o], %[p], [%[y], #48]\n"
     "sbcs %[u], %[u], %[o]\n"
     "sbcs %[v], %[v], %[p]\n"
 
-    BN_ZERO_ADDR(m)
-    FP_OP_P(n)
-    "csel %[m], %[n], %[m], cc\n"
+    "csel %[w], %[n], %[m], cc\n"
 
-    "ldp  %[o], %[p], [%[m]]\n"
+    "ldp  %[o], %[p], [%[w]]\n"
     "adds %[s], %[s], %[o]\n"
     "adcs %[t], %[t], %[p]\n"
-    "ldp  %[o], %[p], [%[m], #16]\n"
+    "ldp  %[o], %[p], [%[w], #16]\n"
     "adcs %[u], %[u], %[o]\n"
     "adc  %[v], %[v], %[p]\n"
 
     "stp %[s], %[t], [%[z], #32]\n"
     "stp %[u], %[v], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
-      [m] "=&r" (m), [n] "=&r" (n), [o] "=&r" (o), [p] "=&r" (p)
-    : [x] "r" (x), [y] "r" (y), [BN_ZERO] "m" (BN_ZERO)
+      [o] "=&r" (o), [p] "=&r" (p), [w] "+r" (m)
+    : [x] "r" (x), [y] "r" (y), [m] "r" (BN_ZERO), [n] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
@@ -723,22 +694,20 @@ void mclx_Fp2_sub(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_fp2* y)
   asm volatile(
     "ldp %[s], %[t], [%[x]]\n"
     "ldp %[u], %[v], [%[x], #16]\n"
-    "ldp %[m], %[n], [%[y]]\n"
-    "ldp %[o], %[p], [%[y], #16]\n"
 
-    "subs %[s], %[s], %[m]\n"
-    "sbcs %[t], %[t], %[n]\n"
+    "ldp %[o], %[p], [%[y]]\n"
+    "subs %[s], %[s], %[o]\n"
+    "sbcs %[t], %[t], %[p]\n"
+    "ldp %[o], %[p], [%[y], #16]\n"
     "sbcs %[u], %[u], %[o]\n"
     "sbcs %[v], %[v], %[p]\n"
 
-    BN_ZERO_ADDR(m)
-    FP_OP_P(n)
-    "csel %[m], %[n], %[m], cc\n"
+    "csel %[w], %[n], %[m], cc\n"
 
-    "ldp  %[o], %[p], [%[m]]\n"
+    "ldp  %[o], %[p], [%[w]]\n"
     "adds %[s], %[s], %[o]\n"
     "adcs %[t], %[t], %[p]\n"
-    "ldp  %[o], %[p], [%[m], #16]\n"
+    "ldp  %[o], %[p], [%[w], #16]\n"
     "adcs %[u], %[u], %[o]\n"
     "adc  %[v], %[v], %[p]\n"
 
@@ -747,30 +716,28 @@ void mclx_Fp2_sub(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_fp2* y)
 
     "ldp %[s], %[t], [%[x], #32]\n"
     "ldp %[u], %[v], [%[x], #48]\n"
-    "ldp %[m], %[n], [%[y], #32]\n"
-    "ldp %[o], %[p], [%[y], #48]\n"
 
-    "subs %[s], %[s], %[m]\n"
-    "sbcs %[t], %[t], %[n]\n"
+    "ldp %[o], %[p], [%[y], #32]\n"
+    "subs %[s], %[s], %[o]\n"
+    "sbcs %[t], %[t], %[p]\n"
+    "ldp %[o], %[p], [%[y], #48]\n"
     "sbcs %[u], %[u], %[o]\n"
     "sbcs %[v], %[v], %[p]\n"
 
-    BN_ZERO_ADDR(m)
-    FP_OP_P(n)
-    "csel %[m], %[n], %[m], cc\n"
+    "csel %[w], %[n], %[m], cc\n"
 
-    "ldp  %[o], %[p], [%[m]]\n"
+    "ldp  %[o], %[p], [%[w]]\n"
     "adds %[s], %[s], %[o]\n"
     "adcs %[t], %[t], %[p]\n"
-    "ldp  %[o], %[p], [%[m], #16]\n"
+    "ldp  %[o], %[p], [%[w], #16]\n"
     "adcs %[u], %[u], %[o]\n"
     "adc  %[v], %[v], %[p]\n"
 
     "stp %[s], %[t], [%[z], #32]\n"
     "stp %[u], %[v], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
-      [m] "=&r" (m), [n] "=&r" (n), [o] "=&r" (o), [p] "=&r" (p)
-    : [x] "r" (x), [y] "r" (y), [BN_ZERO] "m" (BN_ZERO)
+      [o] "=&r" (o), [p] "=&r" (p), [w] "+r" (m)
+    : [x] "r" (x), [y] "r" (y), [m] "r" (BN_ZERO), [n] "r" (FP_OP.P)
     : "cc", "memory"
   );
 }
