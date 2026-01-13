@@ -94,22 +94,22 @@ static void_ppu get_shrUnit(size_t n) {
   return 0;
 }
 
-inline Unit bint_mulUnitN(Unit *z, const Unit *x, Unit y, size_t n) {
+static inline Unit bint_mulUnitN(Unit *z, const Unit *x, Unit y, size_t n) {
   return get_mulUnit(n)(z, x, y);
 }
 
-inline Unit bint_addN(Unit *z, const Unit *x, const Unit *y, size_t n) {
+static inline Unit bint_addN(Unit *z, const Unit *x, const Unit *y, size_t n) {
   return get_add(n)(z, x, y);
 }
 
-inline Unit bint_subN(Unit *z, const Unit *x, const Unit *y, size_t n) {
+static inline Unit bint_subN(Unit *z, const Unit *x, const Unit *y, size_t n) {
   return get_sub(n)(z, x, y);
 }
 
-inline void bint_addUnitN(Unit *z, const Unit *x, Unit y, size_t n) {
+static inline void bint_addUnitN(Unit *z, const Unit *x, Unit y, size_t n) {
   get_addUnit(n)(z, x, y);
 }
 
-inline void bint_addUnitRB(Unit *z, size_t n, Unit y) {
+static inline void bint_addUnitRB(Unit *z, size_t n, Unit y) {
   get_addUnitRB(n)(z, y);
 }

@@ -153,6 +153,18 @@ static void bn_swap_2x4_toBE(uint64_t* r, const _bn_mini_g1* a) {
   );
 }
 
+#if defined(__APPLE__) && defined(__arm64__)
+#define FP_OP_P(a) \
+  "adrp %[" #a "], :pg_hi21:FP_OP+8\n"\
+  "add  %[" #a "], %[" #a "], :lo12:FP_OP+8\n"
+
+
+#define BN_ZERO_ADDR(a) \
+  "adrp %[" #a "], :pg_hi21:BN_ZERO\n"\
+  "add  %[" #a "], %[" #a "], :lo12:BN_ZERO\n"
+
+#else
+
 #define FP_OP_P(a) \
   "adrp %[" #a "], FP_OP+8\n"\
   "add  %[" #a "], %[" #a "], :lo12:FP_OP+8\n"
@@ -160,6 +172,8 @@ static void bn_swap_2x4_toBE(uint64_t* r, const _bn_mini_g1* a) {
 #define BN_ZERO_ADDR(a) \
   "adrp %[" #a "], BN_ZERO\n"\
   "add  %[" #a "], %[" #a "], :lo12:BN_ZERO\n"
+
+#endif
 
 static void mclx_Fp_neg(_bn_mini_fp* y, const _bn_mini_fp* x) {
   uint64_t s, t, u, v;
