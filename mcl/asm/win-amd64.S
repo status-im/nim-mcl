@@ -1224,3 +1224,83 @@ TYPE(mclx_Fp2dbl_sqrPre)
    retq
    nopl  (%rax,%rax)
 SIZE(mclx_Fp2dbl_sqrPre)
+
+.global PRE(mclx_Fpdbl_sqrPre)
+.balign 16
+
+PRE(mclx_Fpdbl_sqrPre):
+TYPE(mclx_Fpdbl_sqrPre)
+   pushq %rdi
+   pushq %rsi
+   pushq %rbx
+   pushq %rbp
+   pushq %r12
+   pushq %r13
+   pushq %r14
+   pushq %r15
+   movq  %rdx, %r11
+   movq  (%r11), %r12
+   movq  0x8(%r11), %r13
+   movq  0x10(%r11), %r14
+   movq  0x18(%r11), %r15
+   movq  %r12, %rdx
+   mulxq %r15, %rdi, %rsi
+   mulxq %r14, %r10, %rax
+   addq  %rax, %rdi
+   movq  %r13, %rdx
+   mulxq %r15, %rax, %rbx
+   adcq  %rax, %rsi
+   adcq  $0x0, %rbx
+   mulxq %r12, %r9, %rax
+   addq  %rax, %r10
+   mulxq %r14, %rax, %rdx
+   adcq  %rax, %rdi
+   adcq  %rdx, %rsi
+   movq  %r15, %rdx
+   mulxq %r14, %rax, %rbp
+   adcq  %rax, %rbx
+   adcq  $0x0, %rbp
+   movq  %rbp, %r8
+   shrq  $0x3f, %r8
+   shldq $0x1, %rbx, %rbp
+   shldq $0x1, %rsi, %rbx
+   shldq $0x1, %rdi, %rsi
+   shldq $0x1, %r10, %rdi
+   shldq $0x1, %r9, %r10
+   shlq  %r9
+   movq  %r12, %rdx
+   mulxq %rdx, %rax, %rdx
+   movq  %rax, (%rcx)
+   addq  %r9, %rdx
+   movq  %rdx, 0x8(%rcx)
+   movq  %r13, %rdx
+   mulxq %rdx, %rax, %rdx
+   adcq  %r10, %rax
+   movq  %rax, 0x10(%rcx)
+   adcq  %rdi, %rdx
+   movq  %rdx, 0x18(%rcx)
+   movq  %r14, %rdx
+   mulxq %rdx, %rax, %rdx
+   adcq  %rsi, %rax
+   movq  %rax, 0x20(%rcx)
+   adcq  %rbx, %rdx
+   movq  %rdx, 0x28(%rcx)
+   movq  %r15, %rdx
+   mulxq %rdx, %rax, %rdx
+   adcq  %rbp, %rax
+   movq  %rax, 0x30(%rcx)
+   adcq  %r8, %rdx
+   movq  %rdx, 0x38(%rcx)
+   popq  %r15
+   popq  %r14
+   popq  %r13
+   popq  %r12
+   popq  %rbp
+   popq  %rbx
+   popq  %rsi
+   popq  %rdi
+   retq
+   nopw  %cs:(%rax,%rax)
+   nopl  (%rax)
+SIZE(mclx_Fpdbl_sqrPre)
+
