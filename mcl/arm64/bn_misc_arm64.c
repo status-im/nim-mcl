@@ -643,7 +643,7 @@ static void mclx_Fp2_add(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_
 
 static void mclx_Fpdbl_sub(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn_mini_fpdbl* y) {
   uint64_t s, t, u, v;
-  uint64_t m, n, o, p;
+  uint64_t m, n, o, p, w;
   asm volatile(
     "ldp %[s], %[t], [%[x]]\n"
     "ldp %[u], %[v], [%[x], #16]\n"
@@ -682,7 +682,7 @@ static void mclx_Fpdbl_sub(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn
     "stp %[s], %[t], [%[z], #32]\n"
     "stp %[u], %[v], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
-      [o] "=&r" (o), [p] "=&r" (p), [w] "+r" (m)
+      [o] "=&r" (o), [p] "=&r" (p), [w] "=&r" (w)
     : [x] "r" (x), [y] "r" (y), [m] "r" (BN_ZERO), [n] "r" (FP_OP.P)
     : "cc", "memory"
   );
@@ -690,7 +690,7 @@ static void mclx_Fpdbl_sub(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const _bn
 
 void mclx_Fp2_sub(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_fp2* y) {
   uint64_t s, t, u, v;
-  uint64_t m, n, o, p;
+  uint64_t m, n, o, p, w;
   asm volatile(
     "ldp %[s], %[t], [%[x]]\n"
     "ldp %[u], %[v], [%[x], #16]\n"
@@ -736,7 +736,7 @@ void mclx_Fp2_sub(_bn_mini_fp2* z, const _bn_mini_fp2* x, const _bn_mini_fp2* y)
     "stp %[s], %[t], [%[z], #32]\n"
     "stp %[u], %[v], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v),
-      [o] "=&r" (o), [p] "=&r" (p), [w] "+r" (m)
+      [o] "=&r" (o), [p] "=&r" (p), [w] "=&r" (w)
     : [x] "r" (x), [y] "r" (y), [m] "r" (BN_ZERO), [n] "r" (FP_OP.P)
     : "cc", "memory"
   );
