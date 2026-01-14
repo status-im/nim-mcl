@@ -223,7 +223,7 @@ static void mclx_Fp_subPre(_bn_mini_fp* r, const _bn_mini_fp* a, const _bn_mini_
     "stp  %[x], %[y], [%[r], #16]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -349,7 +349,7 @@ static void mclx_Fpdbl_subPre(_bn_mini_fpdbl* z, const _bn_mini_fpdbl* x, const 
     "stp  %[s], %[t], [%[z], #48]\n"
     : [z] "+r" (z), [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v)
     : [x] "r" (x), [y] "r" (y)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -837,6 +837,6 @@ static void mclx_Fpdbl_mulPre(_bn_mini_fpdbl* r, const _bn_mini_fp* a, const _bn
       [u] "=&r" (u), [v] "=&r" (v), [w] "=&r" (w),
       [m] "=&r" (m), [n] "=&r" (n), [o] "=&r" (o)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }

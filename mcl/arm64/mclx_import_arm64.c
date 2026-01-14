@@ -151,11 +151,11 @@ static void twice_mp4(uint64_t* r) {
     "stp  %[x], %[y], [%[r]]\n"
     "ldp  %[x], %[y], [%[r], #16]\n"
     "adcs %[x], %[x], %[x]\n"
-    "adcs %[y], %[y], %[y]\n"
+    "adc  %[y], %[y], %[y]\n"
     "stp  %[x], %[y], [%[r], #16]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     :
-    : "memory"
+    : "memory", "cc"
   );
 }
 

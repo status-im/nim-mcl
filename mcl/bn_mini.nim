@@ -48,6 +48,11 @@ type
     a* {.importc: "a".}: BnFp6
     b* {.importc: "b".}: BnFp6
 
+when defined(BN_MINI_DEBUG):
+  {.passC:"-DBN_MINI_DEBUG".}
+  import ./bn_mini_debug
+  export bn_mini_debug
+
 when defined(amd64):
   {.compile: srcPath & "/bn_mini_amd64.c".}
   when defined(windows):

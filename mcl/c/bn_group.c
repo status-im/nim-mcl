@@ -22,9 +22,9 @@ static uint8_t bn_g1_valid_affine(const _bn_mini_g1* P) {
   fp_sqr(&y2, &P->y);
   fp_sqr(&t, &P->x);
 
-  // a is zero for bn curve
-  //fp_add(&t, &t, BN_FP_A);
 
+  // A is zero for bn curve
+  //fp_add(&t, &t, BN_FP_A);
   fp_mul(&t, &t, &P->x);
   fp_add(&t, &t, &BN_FP_B);
   return memcmp(&y2, &t, sizeof(_bn_mini_fp)) == 0;
@@ -147,14 +147,14 @@ static void bn_g1_neg_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P) {
 
 static uint8_t bn_g2_valid_affine(const _bn_mini_g2* P) {
   _bn_mini_fp2 y2, t;
+
   fp2_sqr(&y2, &P->y);
   fp2_sqr(&t, &P->x);
 
-  // a is zero for bn curve
+  // A is zero for bn curve
   //fp2_add(&t, &t, BN_FP2_A);
   fp2_mul(&t, &t, &P->x);
   fp2_add(&t, &t, &BN_FP2_B);
-
   return memcmp(&y2, &t, sizeof(_bn_mini_fp2)) == 0;
 }
 

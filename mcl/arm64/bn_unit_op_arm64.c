@@ -19,7 +19,7 @@ static void bn_add_unit2_rb(uint64_t *r, uint64_t b) {
     "stp  %[x], %[y], [%[r]]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -35,7 +35,7 @@ static void bn_add_unit3_rb(uint64_t *r, uint64_t b) {
     "str  %[x], [%[r], #16]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -52,7 +52,7 @@ static void bn_add_unit4_rb(uint64_t *r, uint64_t b) {
     "stp  %[x], %[y], [%[r], #16]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -73,7 +73,7 @@ static void bn_add_unit5_rb(uint64_t *r, uint64_t b) {
     "str  %[x], [%[r], #32]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -94,7 +94,7 @@ static void bn_add_unit6_rb(uint64_t *r, uint64_t b) {
     "stp  %[x], %[y], [%[r], #32]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -119,7 +119,7 @@ static void bn_add_unit7_rb(uint64_t *r, uint64_t b) {
     "str  %[x], [%[r], #48]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -144,7 +144,7 @@ static void bn_add_unit8_rb(uint64_t *r, uint64_t b) {
     "stp  %[x], %[y], [%[r], #48]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -156,7 +156,7 @@ static void bn_add_unit1(uint64_t *r, const uint64_t* a, uint64_t b) {
     "str  %[x], [%[r]]\n"
     : [r] "+r" (r), [x] "=&r" (x)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -169,7 +169,7 @@ static void bn_add_unit2(uint64_t *r, const uint64_t* a, uint64_t b) {
     "stp  %[x], %[y], [%[r]]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -185,7 +185,7 @@ static void bn_add_unit3(uint64_t *r, const uint64_t* a, uint64_t b) {
     "str  %[x], [%[r], #16]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -202,7 +202,7 @@ static void bn_add_unit4(uint64_t *r, const uint64_t* a, uint64_t b) {
     "stp  %[x], %[y], [%[r], #16]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -222,7 +222,7 @@ static void bn_add_unit5(uint64_t *r, const uint64_t* a, uint64_t b) {
     "str  %[x], [%[r], #32]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -243,7 +243,7 @@ static void bn_add_unit6(uint64_t *r, const uint64_t* a, uint64_t b) {
     "stp  %[x], %[y], [%[r], #32]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -267,7 +267,7 @@ static void bn_add_unit7(uint64_t *r, const uint64_t* a, uint64_t b) {
     "str  %[x], [%[r], #48]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -292,7 +292,7 @@ static void bn_add_unit8(uint64_t *r, const uint64_t* a, uint64_t b) {
     "stp  %[x], %[y], [%[r], #48]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
 }
 
@@ -304,7 +304,7 @@ static uint64_t bn_mul_unit1(uint64_t *r, const uint64_t* a, uint64_t b) {
     "str   %[x], [%[r]]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -320,7 +320,7 @@ static uint64_t bn_mul_unit2(uint64_t *r, const uint64_t* a, uint64_t b) {
     "stp   %[w], %[x], [%[r]]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -340,7 +340,7 @@ static uint64_t bn_mul_unit3(uint64_t *r, const uint64_t* a, uint64_t b) {
     "adc   %[y], %[w], xzr\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -362,7 +362,7 @@ static uint64_t bn_mul_unit4(uint64_t* r, const uint64_t* a, uint64_t b) {
     "adc   %[y], %[w], xzr\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -388,7 +388,7 @@ static uint64_t bn_mul_unit5(uint64_t *r, const uint64_t* a, uint64_t b) {
     "adc   %[y], %[y], xzr\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -416,7 +416,7 @@ static uint64_t bn_mul_unit6(uint64_t *r, const uint64_t* a, uint64_t b) {
     "adc   %[y], %[y], xzr\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -448,7 +448,7 @@ static uint64_t bn_mul_unit7(uint64_t *r, const uint64_t* a, uint64_t b) {
     "adc   %[y], %[w], xzr\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -482,7 +482,7 @@ static uint64_t bn_mul_unit8(uint64_t *r, const uint64_t* a, uint64_t b) {
     "adc   %[y], %[w], xzr\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return y;
 }
@@ -498,7 +498,7 @@ static uint64_t bn_mul_unit_add1(uint64_t *r, const uint64_t* a, uint64_t b) {
     "str  %[y], [%[r]]\n"
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return w;
 }
@@ -519,7 +519,7 @@ static uint64_t bn_mul_unit_add2(uint64_t *r, const uint64_t* a, uint64_t b) {
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w),
       [s] "=&r" (s), [t] "=&r" (t)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return w;
 }
@@ -546,7 +546,7 @@ static uint64_t bn_mul_unit_add3(uint64_t *r, const uint64_t* a, uint64_t b) {
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w),
       [s] "=&r" (s), [t] "=&r" (t)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return w;
 }
@@ -580,7 +580,7 @@ static uint64_t bn_mul_unit_add4(uint64_t* r, const uint64_t* a, uint64_t b) {
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w),
       [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return v;
 }
@@ -620,7 +620,7 @@ static uint64_t bn_mul_unit_add5(uint64_t *r, const uint64_t* a, uint64_t b) {
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w),
       [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return w;
 }
@@ -667,7 +667,7 @@ static uint64_t bn_mul_unit_add6(uint64_t *r, const uint64_t* a, uint64_t b) {
     : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w),
       [s] "=&r" (s), [t] "=&r" (t), [u] "=&r" (u), [v] "=&r" (v)
     : [a] "r" (a), [b] "r" (b)
-    : "memory"
+    : "memory", "cc"
   );
   return w;
 }
