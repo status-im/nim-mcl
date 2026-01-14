@@ -310,15 +310,15 @@ static uint64_t bn_mul_unit1(uint64_t *r, const uint64_t* a, uint64_t b) {
 }
 
 static uint64_t bn_mul_unit2(uint64_t *r, const uint64_t* a, uint64_t b) {
-  uint64_t x, y, z;
+  uint64_t x, y, z, w;
   asm volatile(
     "ldp   %[x], %[y], [%[a]]\n"
-    wmul(x, b, a, x)
+    wmul(x, b, w, x)
     wmul(y, b, z, y)
     "adds  %[x], %[x], %[z]\n"
     "adc   %[y], %[y], xzr\n"
-    "stp   %[a], %[x], [%[r]]\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z)
+    "stp   %[w], %[x], [%[r]]\n"
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -326,19 +326,19 @@ static uint64_t bn_mul_unit2(uint64_t *r, const uint64_t* a, uint64_t b) {
 }
 
 static uint64_t bn_mul_unit3(uint64_t *r, const uint64_t* a, uint64_t b) {
-  uint64_t x, y, z;
+  uint64_t x, y, z, w;
   asm volatile(
     "ldp   %[x], %[y], [%[a]]\n"
     wmul(x, b, z, x)
     "str   %[z], [%[r]]\n"
     wmul(y, b, z, y)
     "adds  %[x], %[z], %[x]\n"
-    "ldr   %[a], [%[a], #16]\n"
-    wmul(a, b, z, a)
+    "ldr   %[w], [%[a], #16]\n"
+    wmul(w, b, z, w)
     "adcs  %[y], %[z], %[y]\n"
     "stp   %[x], %[y], [%[r], #8]\n"
-    "adc   %[y], %[a], xzr\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z)
+    "adc   %[y], %[w], xzr\n"
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -360,7 +360,7 @@ static uint64_t bn_mul_unit4(uint64_t* r, const uint64_t* a, uint64_t b) {
     "adcs  %[y], %[y], %[z]\n"
     "stp   %[x], %[y], [%[r], #16]\n"
     "adc   %[y], %[w], xzr\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "+r" (w)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );

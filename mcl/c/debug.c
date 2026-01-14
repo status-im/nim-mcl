@@ -93,3 +93,9 @@ void mpz_print(const mpz_class* x, const char* name) {
     printf("0x%016llx\n", x->buf_[i]);
   }
 }
+
+void debugN(uint64_t* x, int size, const char* name) {
+  for(int i = 0; i < size; i++) {
+    printf("%s: %016llx\n", name, x[i]);
+  }
+}

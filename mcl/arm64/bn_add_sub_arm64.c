@@ -7,7 +7,7 @@ static uint64_t bn_add1(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adds %[x], %[x], %[y]\n"
     "str  %[x], [%[r]]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -24,7 +24,7 @@ static uint64_t bn_add2(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r]]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -46,7 +46,7 @@ static uint64_t bn_add3(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[x], %[x], %[y]\n"
     "str  %[x], [%[r], #16]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -68,7 +68,7 @@ static uint64_t bn_add4(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r], #16]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -95,7 +95,7 @@ static uint64_t bn_add5(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[x], %[x], %[y]\n"
     "str  %[x], [%[r], #32]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -122,7 +122,7 @@ static uint64_t bn_add6(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r], #32]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -154,7 +154,7 @@ static uint64_t bn_add7(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[x], %[x], %[y]\n"
     "str  %[x], [%[r], #48]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -186,7 +186,7 @@ static uint64_t bn_add8(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "adcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r], #48]\n"
     "cset %[v], cs\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -199,10 +199,10 @@ static uint64_t bn_sub1(uint64_t *r, const uint64_t* a, const uint64_t* b) {
   asm volatile(
     "ldr  %[x], [%[a]]\n"
     "ldr  %[y], [%[b]]\n"
-    "sub  %[x], %[x], %[y]\n"
+    "subs %[x], %[x], %[y]\n"
     "str  %[x], [%[r]]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -216,10 +216,10 @@ static uint64_t bn_sub2(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "ldp  %[x], %[y], [%[a]]\n"
     "ldp  %[z], %[w], [%[b]]\n"
     "subs %[x], %[x], %[z]\n"
-    "sbc  %[y], %[y], %[w]\n"
+    "sbcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r]]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -241,7 +241,7 @@ static uint64_t bn_sub3(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "sbcs %[x], %[x], %[y]\n"
     "str  %[x], [%[r], #16]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -263,7 +263,7 @@ static uint64_t bn_sub4(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "sbcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r], #16]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -290,7 +290,7 @@ static uint64_t bn_sub5(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "sbcs %[x], %[x], %[y]\n"
     "str  %[x], [%[r], #32]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -317,7 +317,7 @@ static uint64_t bn_sub6(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "sbcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r], #32]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -349,7 +349,7 @@ static uint64_t bn_sub7(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "sbcs %[x], %[x], %[y]\n"
     "str  %[x], [%[r], #48]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
@@ -381,7 +381,7 @@ static uint64_t bn_sub8(uint64_t *r, const uint64_t* a, const uint64_t* b) {
     "sbcs %[y], %[y], %[w]\n"
     "stp  %[x], %[y], [%[r], #48]\n"
     "cset %[v], cc\n"
-    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=&r" (v)
+    : [r] "+r" (r), [x] "=&r" (x), [y] "=&r" (y), [z] "=&r" (z), [w] "=&r" (w), [v] "=r" (v)
     : [a] "r" (a), [b] "r" (b)
     : "memory"
   );
