@@ -121,9 +121,12 @@ template testPairing(inHex, outHex: string) =
   var c = Comp(
     data: hexToSeqByte(inHex)
   )
-  check bn256ecPairingImpl(c)
-  let res = hexToSeqByte(outHex)
-  check c.output == res
+  if outHex.len == 0:
+    check bn256ecPairingImpl(c) == false
+  else:
+    check bn256ecPairingImpl(c)
+    let res = hexToSeqByte(outHex)
+    check c.output == res
 
 suite "bn_mini":
   test "ec add":

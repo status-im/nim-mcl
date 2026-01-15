@@ -39,6 +39,15 @@ uint8_t bn_g1_iszero(_bn_mini_g1* P) {
   return all_zero4(P->z.d);
 }
 
+static uint8_t bn_g2_iszero(_bn_mini_g2* P) {
+  return fp2_iszero(&P->z);
+}
+
+static void bn_g2_clear(_bn_mini_g2* P) {
+  // jacobian clear
+  memset(P, 0, sizeof(_bn_mini_g2));
+}
+
 static void _bn_g1_normalize_jacobi(_bn_mini_g1* Q, const _bn_mini_g1* P, const _bn_mini_fp* inv) {
   _bn_mini_fp inv2;
   fp_sqr(&inv2, inv);
@@ -56,6 +65,17 @@ static void bn_g1_normalize_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P) {
   fp_inv(&R->z, &P->z);
   _bn_g1_normalize_jacobi(R, P, &R->z);
 }
+
+/*
+	M > S + A
+	a = 0   2M + 5S + 14A
+	a = -3  2M + 7S + 15A
+	generic 3M + 7S + 15A
+	M == S
+	a = 0   3M + 4S + 13A
+	a = -3  3M + 6S + 14A
+	generic 4M + 6S + 14A
+*/
 
 static void bn_g1_dbl_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P) {
   _bn_mini_fp x2, y2, xy, t;
@@ -98,13 +118,45 @@ static void bn_g1_dbl_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P) {
   fp_sub(&R->y, &R->y, &y2);
 }
 
-static uint8_t bn_g2_iszero(_bn_mini_g2* P) {
-  return fp2_iszero(&P->z);
-}
+static void bn_g2_dbl_jacobi(_bn_mini_g2* R, const _bn_mini_g2* P) {
+  _bn_mini_fp2 x2, y2, xy, t;
 
-static void bn_g2_clear(_bn_mini_g2* P) {
-  // jacobian clear
-  memset(P, 0, sizeof(_bn_mini_g2));
+  if (bn_g2_iszero(P)) {
+    bn_g2_clear(R);
+    return;
+  }
+  const uint8_t isPzOne = fp2_isone(&P->z);
+
+  fp2_sqr(&x2, &P->x);
+  fp2_sqr(&y2, &P->y);
+
+  // sizeof(F) <= 32
+  fp2_mul(&xy, &P->x, &y2);
+  fp2_add(&xy, &xy,   &xy);
+  fp2_sqr(&y2, &y2);
+
+  fp2_add(&xy, &xy, &xy); // 4xy^2
+  fp2_mul2(&t, &x2);
+  fp2_add(&x2, &x2, &t);
+
+  fp2_sqr(&R->x, &x2);
+  fp2_sub(&R->x, &R->x, &xy);
+  fp2_sub(&R->x, &R->x, &xy);
+
+  if (isPzOne) {
+    memcpy(&R->z, &P->y, sizeof(_bn_mini_fp2));
+  } else {
+    fp2_mul(&R->z, &P->y, &P->z);
+  }
+
+  fp2_mul2(&R->z, &R->z);
+  fp2_sub(&R->y, &xy, &R->x);
+
+  fp2_mul(&R->y, &R->y, &x2);
+  fp2_mul2(&y2, &y2);
+  fp2_mul2(&y2, &y2);
+  fp2_mul2(&y2, &y2);
+  fp2_sub(&R->y, &R->y, &y2);
 }
 
 static void bn_g2_neg(_bn_mini_g2* R, const _bn_mini_g2* P) {
@@ -142,6 +194,16 @@ static void bn_g1_neg_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P) {
   }
   R->x = P->x;
   fp_neg(&R->y, &P->y);
+  R->z = P->z;
+}
+
+static void bn_g2_neg_jacobi(_bn_mini_g2* R, const _bn_mini_g2* P) {
+  if (bn_g2_iszero(P)) {
+    bn_g2_clear(R);
+    return;
+  }
+  R->x = P->x;
+  fp2_neg(&R->y, &P->y);
   R->z = P->z;
 }
 
@@ -268,10 +330,96 @@ void bn_g1_add_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P, const _bn_mini_g1* Q
   fp_sub(&R->y, &U1, &H3);
 }
 
+void bn_g2_add_jacobi(_bn_mini_g2* R, const _bn_mini_g2* P, const _bn_mini_g2* Q) {
+  _bn_mini_fp2 r, U1, S1, H, H3;
+  if (bn_g2_iszero(P)) { memcpy(R, Q, sizeof(_bn_mini_g2)); return; }
+  if (bn_g2_iszero(Q)) { memcpy(R, P, sizeof(_bn_mini_g2)); return; }
+  uint8_t isPzOne = fp2_isone(&P->z);
+  uint8_t isQzOne = fp2_isone(&Q->z);
+
+  if (isPzOne) {
+    // r = 1;
+  } else {
+    fp2_sqr(&r, &P->z);
+  }
+
+  if (isQzOne) {
+    U1 = P->x;
+    if (isPzOne) {
+      H = Q->x;
+    } else {
+      fp2_mul(&H, &Q->x, &r);
+    }
+    fp2_sub(&H, &H, &U1);
+    S1 = P->y;
+  } else {
+    fp2_sqr(&S1, &Q->z);
+    fp2_mul(&U1, &P->x, &S1);
+    if (isPzOne) {
+      H = Q->x;
+    } else {
+      fp2_mul(&H, &Q->x, &r);
+    }
+    fp2_sub(&H, &H, &U1);
+    fp2_mul(&S1, &S1, &Q->z);
+    fp2_mul(&S1, &S1, &P->y);
+  }
+
+  if (isPzOne) {
+    r = Q->y;
+  } else {
+    fp2_mul(&r, &r, &P->z);
+    fp2_mul(&r, &r, &Q->y);
+  }
+  fp2_sub(&r, &r, &S1);
+
+  if (fp2_iszero(&H)) {
+    if (fp2_iszero(&r)) {
+      bn_g2_dbl_jacobi(R, P);
+    } else {
+      bn_g2_clear(R);
+    }
+    return;
+  }
+
+  if (isPzOne) {
+    if (isQzOne) {
+      R->z = H;
+    } else {
+      fp2_mul(&R->z, &H, &Q->z);
+    }
+  } else {
+    if (isQzOne) {
+      fp2_mul(&R->z, &P->z, &H);
+    } else {
+      fp2_mul(&R->z, &P->z, &Q->z);
+      fp2_mul(&R->z, &R->z, &H);
+    }
+  }
+
+  fp2_sqr(&H3, &H); // H^2
+  fp2_sqr(&R->y, &r); // r^2
+  fp2_mul(&U1, &U1, &H3); // U1 H^2
+  fp2_mul(&H3, &H3, &H); // H^3
+  fp2_sub(&R->y, &R->y, &U1);
+  fp2_sub(&R->y, &R->y, &U1);
+  fp2_sub(&R->x, &R->y, &H3);
+  fp2_sub(&U1, &U1, &R->x);
+  fp2_mul(&U1, &U1, &r);
+  fp2_mul(&H3, &H3, &S1);
+  fp2_sub(&R->y, &U1, &H3);
+}
+
 static void bn_g1_sub_jacobi(_bn_mini_g1* R, const _bn_mini_g1* P, const _bn_mini_g1* Q) {
   _bn_mini_g1 nQ;
   bn_g1_neg_jacobi(&nQ, Q);
   bn_g1_add_jacobi(R, P, &nQ);
+}
+
+static void bn_g2_sub_jacobi(_bn_mini_g2* R, const _bn_mini_g2* P, const _bn_mini_g2* Q) {
+  _bn_mini_g2 nQ;
+  bn_g2_neg_jacobi(&nQ, Q);
+  bn_g2_add_jacobi(R, P, &nQ);
 }
 
 uint8_t bn_g1_from_bytes_be(_bn_mini_g1* P, const uint8_t* data) {
@@ -305,6 +453,8 @@ uint8_t bn_g1_to_bytes_be(_bn_mini_g1* P, char* output) {
   return 1;
 }
 
+static uint8_t bn_g2_verify_order(const _bn_mini_g2* P);
+
 uint8_t bn_g2_from_bytes_be(_bn_mini_g2* P, const uint8_t* data) {
   if(all_zero16((const uint64_t*) data)) {
     bn_g2_clear(P);
@@ -318,5 +468,6 @@ uint8_t bn_g2_from_bytes_be(_bn_mini_g2* P, const uint8_t* data) {
 
   fp_set_one(&P->z.a);
   bn_fp_clear(&P->z.b);
-  return bn_g2_valid_affine(P);
+
+  return bn_g2_valid_affine(P) && bn_g2_verify_order(P);
 }

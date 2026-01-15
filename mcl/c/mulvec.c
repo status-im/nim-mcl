@@ -224,7 +224,7 @@ static void mpz_from_fr(mpz_class* x, const _bn_mini_fr* fr) {
 
 //  v = naf[i]
 //  v = 0 or (|v| <= 2^(w-1) - 1 and odd)
-static void getNAFwidth(NafArray* naf, mpz_class* x) {
+static void getNAFwidth(NafArray* naf, mpz_class* x, int w) {
   naf_clear(naf);
   uint8_t negative = 0;
   if (mpz_isneg(x)) {
@@ -232,7 +232,7 @@ static void getNAFwidth(NafArray* naf, mpz_class* x) {
     mpz_neg(x);
   }
   size_t zeroNum = 0;
-  const int signedMaxW = 1 << (GLV_W - 1);
+  const int signedMaxW = 1 << (w - 1);
   const int maxW = signedMaxW * 2;
   const int maskW = maxW - 1;
 
@@ -246,13 +246,13 @@ static void getNAFwidth(NafArray* naf, mpz_class* x) {
       naf_push(naf, 0);
     }
     int v = mpz_getunit(x)[0] & maskW;
-    mpz_shr(x, GLV_W);
+    mpz_shr(x, w);
     if (v & signedMaxW) {
       mpz_inc(x);
       v -= maxW;
     }
     naf_push(naf, (int8_t)v);
-    zeroNum = GLV_W - 1;
+    zeroNum = w - 1;
   }
   if (negative) {
     for (size_t i = 0; i < naf_size(naf); i++) {
@@ -339,7 +339,7 @@ static void g1_mulLambda(_bn_mini_g1* Q, const _bn_mini_g1* P) {
   Q->z = P->z;
 }
 
-static void addTbl(_bn_mini_g1* Q, const _bn_mini_g1* tbl, const NafArray* naf, size_t i) {
+static void g1_addTbl(_bn_mini_g1* Q, const _bn_mini_g1* tbl, const NafArray* naf, size_t i) {
   if (i >= naf_size(naf)) return;
   int n = naf_get(naf, i);
   if (n > 0) {
@@ -355,8 +355,8 @@ static void mulVecGLVsmall(_bn_mini_g1* z, const _bn_mini_g1* xVec, const _bn_mi
   mpz_class u[GLV_SPLITN], y;
   size_t maxBit = 0;
 
-  naf_init(&naf[0]);
-  naf_init(&naf[1]);
+  naf_init(&naf[0], GLV_NAF_SIZE);
+  naf_init(&naf[1], GLV_NAF_SIZE);
 
   mpz_from_fr(&y, yVec);
   const Unit *y0 = mpz_getunit(&y);
@@ -364,10 +364,10 @@ static void mulVecGLVsmall(_bn_mini_g1* z, const _bn_mini_g1* xVec, const _bn_mi
   if (yn <= 1 && mulSmallInt(z, &xVec[0], *y0, 0)) return;
   mpz_split(u, &y);
 
-  getNAFwidth(&naf[0], &u[0]);
+  getNAFwidth(&naf[0], &u[0], GLV_W);
   if (naf_size(&naf[0]) > maxBit) maxBit = naf_size(&naf[0]);
 
-  getNAFwidth(&naf[1], &u[1]);
+  getNAFwidth(&naf[1], &u[1], GLV_W);
   if (naf_size(&naf[1]) > maxBit) maxBit = naf_size(&naf[1]);
 
   _bn_mini_g1 P2;
@@ -388,8 +388,8 @@ static void mulVecGLVsmall(_bn_mini_g1* z, const _bn_mini_g1* xVec, const _bn_mi
   for (size_t i = 0; i < maxBit; i++) {
     const size_t bit = maxBit - 1 - i;
     bn_g1_dbl_jacobi(z, z);
-    addTbl(z, tbl[0], &naf[0], bit);
-    addTbl(z, tbl[1], &naf[1], bit);
+    g1_addTbl(z, tbl[0], &naf[0], bit);
+    g1_addTbl(z, tbl[1], &naf[1], bit);
   }
 }
 
@@ -406,4 +406,76 @@ uint8_t bn_fr_from_bytes_be(_bn_mini_fr* z, const uint8_t* data) {
 
 void bn_g1_mul_scalar(_bn_mini_g1* R, const _bn_mini_g1* P, const _bn_mini_fr* s) {
   mulVecGLVsmall(R, P, s);
+}
+
+static void g2_addTbl(_bn_mini_g2* Q, const _bn_mini_g2* tbl, const NafArray* naf, size_t i) {
+  if (i >= naf_size(naf)) return;
+  int n = naf_get(naf, i);
+  if (n > 0) {
+    bn_g2_add_jacobi(Q, Q, &tbl[(n - 1) >> 1]);
+  } else if (n < 0) {
+    bn_g2_sub_jacobi(Q, Q, &tbl[(-n - 1) >> 1]);
+  }
+}
+
+static inline void mulArray(_bn_mini_g2* z, const _bn_mini_g2* x, const mpz_class* y, uint8_t isNegative) {
+  mpz_class v;
+
+  if (mpz_size(y) == 0) {
+    bn_g2_clear(z);
+    return;
+  }
+
+  Unit* y0 = mpz_getunit(y);
+  size_t yn = mpz_realsize(y);
+  if (yn <= 1 && mulSmallInt(z, x, *y0, isNegative)) return;
+
+  mpz_copy(&v, y0, yn);
+
+  if (isNegative) mpz_neg(&v);
+  const int maxW = 5;
+  const int maxTblSize = 1 << (maxW - 2);
+
+  // L = log2(y), w = (L <= 32) ? 3 : (L <= 128) ? 4 : 5;
+
+  const int w = (yn == 1 && mpz_lte_unit(y, ((Unit)1 << 32))) ? 3 : (yn * sizeof(Unit) > 16) ? 5 : 4;
+  const size_t tblSize = (size_t)1 << (w - 2);
+
+  NafArray naf;
+  _bn_mini_g2 tbl[maxTblSize];
+  _bn_mini_g2 P2;
+
+  naf_init(&naf, NAF_FP2_SIZE);
+  getNAFwidth(&naf, &v, w);
+
+  bn_g2_dbl_jacobi(&P2, x);
+
+  memcpy(&tbl[0], x, sizeof(_bn_mini_g2));
+  for (size_t i = 1; i < tblSize; i++) {
+    bn_g2_add_jacobi(&tbl[i], &tbl[i - 1], &P2);
+  }
+
+  bn_g2_clear(z);
+  for (size_t i = 0; i < naf_size(&naf); i++) {
+    bn_g2_dbl_jacobi(z, z);
+    g2_addTbl(z, tbl, &naf, naf_size(&naf) - 1 - i);
+  }
+}
+
+static inline void mulGeneric(_bn_mini_g2* z, const _bn_mini_g2* x, const mpz_class* y) {
+  mulArray(z, x, y, mpz_isneg(y));
+}
+
+static mpz_class bn_order = {
+  0, 4,
+  0x43e1f593f0000001,
+  0x2833e84879b97091,
+  0xb85045b68181585d,
+  0x30644e72e131a029
+};
+
+static uint8_t bn_g2_verify_order(const _bn_mini_g2* P) {
+  _bn_mini_g2 Q;
+  mulGeneric(&Q, P, &bn_order);
+  return bn_g2_iszero(&Q);
 }

@@ -172,6 +172,15 @@ static uint8_t mpz_lt(const mpz_class* x, const mpz_class* y) {
   return mpz_compare(x, y) < 0;
 }
 
+static uint8_t mpz_lte_unit(const mpz_class* x, Unit y) {
+  if(x->size_ == 0) return 0;
+  uint8_t res = x->buf_[0] <= y;
+  for(int i = 1; i < x->size_; i++) {
+    res &= x->buf_[i] == 0;
+  }
+  return res;
+}
+
 static size_t mpz_bitsize(const mpz_class* t) {
   return getBitSize(mpz_getunit(t), mpz_size(t));
 }

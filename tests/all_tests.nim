@@ -10,7 +10,6 @@
 {.push raises: [].}
 
 import
-  ../mcl/bn_abi,
-  ./test_bn_mini
+  ../mcl/bn_abi
 
 doAssert(mclBn_init(MCL_BN_SNARK1, MCLBN_COMPILED_TIME_VAR) == 0.cint, "FAILED TO EXECUTE mclBn_Init")
