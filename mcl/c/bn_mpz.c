@@ -53,6 +53,30 @@ static void mpz_clear(mpz_class* x) {
   x->buf_[0] = 0;
 }
 
+static void mulNM(Unit *z, const Unit *x, size_t xn, const Unit *y, size_t yn) {
+  if (xn == 0 || yn == 0) return;
+  if (yn > xn) {
+    swap_size_t(&yn, &xn);
+    swap_unit_pointer(&x, &y);
+  }
+  assert(xn >= yn);
+  Unit px[MPZ_N];
+  Unit py[MPZ_N];
+  if (z == x) {
+    copyN(px, x, xn);
+    x = px;
+  }
+  if (z == y) {
+    copyN(py, y, yn);
+    y = py;
+  }
+  z[xn] = bint_mulUnitN(z, x, y[0], xn);
+  u_ppu mulUnitAdd = get_mulUnitAdd(xn);
+  for (size_t i = 1; i < yn; i++) {
+    z[xn + i] = mulUnitAdd(&z[i], x, y[i]);
+  }
+}
+
 static void mpz_mul(mpz_class* z, const mpz_class* x, const mpz_class* y) {
   const size_t xn = mpz_size(x);
   const size_t yn = mpz_size(y);
@@ -204,7 +228,7 @@ static void mpz_udiv(mpz_class* r, const Unit *x, size_t xn, const Unit *y, size
     return;
   }
 
-  Unit *xx = (Unit*)ALLOCA(sizeof(Unit) * xn);
+  Unit xx[MPZ_N];
   copyN(xx, x, xn);
   size_t rn = udivrem(0, 0, xx, xn, y, yn);
   mpz_copy(r, xx, rn);

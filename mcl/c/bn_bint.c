@@ -1,27 +1,3 @@
-static void mulNM(Unit *z, const Unit *x, size_t xn, const Unit *y, size_t yn) {
-  if (xn == 0 || yn == 0) return;
-  if (yn > xn) {
-    swap_size_t(&yn, &xn);
-    swap_unit_pointer(&x, &y);
-  }
-  assert(xn >= yn);
-  if (z == x) {
-    Unit *p = (Unit*)ALLOCA(sizeof(Unit) * xn);
-    copyN(p, x, xn);
-    x = p;
-  }
-  if (z == y) {
-    Unit *p = (Unit*)ALLOCA(sizeof(Unit) * yn);
-    copyN(p, y, yn);
-    y = p;
-  }
-  z[xn] = bint_mulUnitN(z, x, y[0], xn);
-  u_ppu mulUnitAdd = get_mulUnitAdd(xn);
-  for (size_t i = 1; i < yn; i++) {
-    z[xn + i] = mulUnitAdd(&z[i], x, y[i]);
-  }
-}
-
 // z[n] = x[n] >> bit
 // 0 < bit < UnitBitSize
 static void shrN(Unit *pz, const Unit *px, size_t bit, size_t n) {

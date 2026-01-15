@@ -73,7 +73,7 @@ static Unit divSmall(Unit *q, size_t qn, Unit *x, size_t xn, const Unit *y, size
       sub(x, x, y);
       qv = 1;
     } else {
-      Unit *t = (Unit*) ALLOCA(sizeof(Unit) * yn);
+      Unit t[MPZ_N];
       qv = x[yn - 1] / (yTop + 1);
       bint_mulUnitN(t, y, qv, yn);
       sub(x, x, t);
@@ -100,7 +100,7 @@ static size_t divFullBit(Unit *q, size_t qn, Unit *x, size_t xn, const Unit *y, 
   const Unit yTop = y[yn - 1];
   assert(yTop >> (UnitBitSize - 1));
   if (q) bint_clearN(q, qn);
-  Unit *t = (Unit*) ALLOCA(sizeof(Unit) * yn);
+  Unit t[MPZ_N];
   Unit rev = 0;
   // rev = M/2 M / yTop where M = 1 << UnitBitSize
   if (yTop != (Unit)-1) {
@@ -156,9 +156,9 @@ size_t udivrem(Unit *q, size_t qn, Unit *x, size_t xn, const Unit *y, size_t yn)
   const size_t yTopBit = bsr(y[yn - 1]);
   const size_t shift = UnitBitSize - 1 - yTopBit;
   if (shift) {
-    Unit *yShift = (Unit *) ALLOCA(sizeof(Unit) * yn);
+    Unit yShift[MPZ_N];
     shlN(yShift, y, shift, yn);
-    Unit *xx = (Unit*) ALLOCA(sizeof(Unit) * (xn + 1));
+    Unit xx[MPZ_N+1];
     Unit v = shlN(xx, x, shift, xn);
     if (v) {
       xx[xn] = v;

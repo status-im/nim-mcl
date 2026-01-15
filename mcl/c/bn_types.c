@@ -13,7 +13,6 @@ typedef void (*void_ppu)(Unit*, const Unit*, Unit);
 typedef void (*void_pu)(Unit*, Unit);
 
 #define UnitBitSize (sizeof(Unit) * 8)
-#define ALLOCA(x) __builtin_alloca(x)
 
 typedef struct {
   uint64_t RP;
