@@ -55,7 +55,7 @@ static void mpz_split(mpz_class u[2], mpz_class* x) {
   mpz_neg(b);
 }
 
-static uint8_t mulSmallInt(_bn_mini_g1* z, const _bn_mini_g1* x, Unit y, uint8_t isNegative) {
+static uint8_t g1_mulSmallInt(_bn_mini_g1* z, const _bn_mini_g1* x, Unit y, uint8_t isNegative) {
   switch (y) {
   case 0: bn_g1_clear(z); return 1;
   case 1: memcpy(z, x, sizeof(_bn_mini_g1)); break;
@@ -172,6 +172,127 @@ static uint8_t mulSmallInt(_bn_mini_g1* z, const _bn_mini_g1* x, Unit y, uint8_t
   }
   if (isNegative) {
     bn_g1_neg_jacobi(z, z);
+  }
+  return 1;
+}
+
+static uint8_t g2_mulSmallInt(_bn_mini_g2* z, const _bn_mini_g2* x, Unit y, uint8_t isNegative) {
+  switch (y) {
+  case 0: bn_g2_clear(z); return 1;
+  case 1: memcpy(z, x, sizeof(_bn_mini_g2)); break;
+  case 2: bn_g2_dbl_jacobi(z, x); break;
+  case 3: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_add_jacobi(z, &t, x);
+    break;
+  }
+  case 4: {
+    bn_g2_dbl_jacobi(z, x);
+    bn_g2_dbl_jacobi(z, z);
+    break;
+  }
+  case 5: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_add_jacobi(z, &t, x);
+    break;
+  }
+  case 6: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_add_jacobi(z, &t, x);
+    bn_g2_dbl_jacobi(z, z);
+    break;
+  }
+  case 7: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_sub_jacobi(z, &t, x);
+    break;
+  }
+  case 8: {
+    bn_g2_dbl_jacobi(z, x);
+    bn_g2_dbl_jacobi(z, z);
+    bn_g2_dbl_jacobi(z, z);
+    break;
+  }
+  case 9: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_add_jacobi(z, &t, x);
+    break;
+  }
+  case 10: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_add_jacobi(z, &t, x);
+    bn_g2_dbl_jacobi(z, z);
+    break;
+  }
+  case 11: {
+    _bn_mini_g2 t1, t2;
+    bn_g2_dbl_jacobi(&t1, x); // 2x
+    bn_g2_dbl_jacobi(&t2, &t1);
+    bn_g2_dbl_jacobi(&t2, &t2); // 8x
+    bn_g2_add_jacobi(&t2, &t2, &t1);
+    bn_g2_add_jacobi(z, &t2, x);
+    break;
+  }
+  case 12: {
+    _bn_mini_g2 t1, t2;
+    bn_g2_dbl_jacobi(&t1, x);
+    bn_g2_dbl_jacobi(&t1, &t1); // 4x
+    bn_g2_dbl_jacobi(&t2, &t1); // 8x
+    bn_g2_add_jacobi(z, &t1, &t2);
+    break;
+  }
+  case 13: {
+    _bn_mini_g2 t1, t2;
+    bn_g2_dbl_jacobi(&t1, x);
+    bn_g2_dbl_jacobi(&t1, &t1); // 4x
+    bn_g2_dbl_jacobi(&t2, &t1); // 8x
+    bn_g2_add_jacobi(&t1, &t1, &t2); // 12x
+    bn_g2_add_jacobi(z, &t1, x);
+    break;
+  }
+  case 14: {
+    _bn_mini_g2 t;
+    // (8 - 1) * 2
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_sub_jacobi(&t, &t, x);
+    bn_g2_dbl_jacobi(z, &t);
+    break;
+  }
+  case 15: {
+    _bn_mini_g2 t;
+    bn_g2_dbl_jacobi(&t, x);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_dbl_jacobi(&t, &t);
+    bn_g2_sub_jacobi(z, &t, x);
+    break;
+  }
+  case 16: {
+    bn_g2_dbl_jacobi(z, x);
+    bn_g2_dbl_jacobi(z, z);
+    bn_g2_dbl_jacobi(z, z);
+    bn_g2_dbl_jacobi(z, z);
+    break;
+  }
+  default:
+    return 0;
+  }
+  if (isNegative) {
+    bn_g2_neg_jacobi(z, z);
   }
   return 1;
 }
@@ -361,7 +482,7 @@ static void mulVecGLVsmall(_bn_mini_g1* z, const _bn_mini_g1* xVec, const _bn_mi
   mpz_from_fr(&y, yVec);
   const Unit *y0 = mpz_getunit(&y);
   size_t yn = mpz_realsize(&y);
-  if (yn <= 1 && mulSmallInt(z, &xVec[0], *y0, 0)) return;
+  if (yn <= 1 && g1_mulSmallInt(z, &xVec[0], *y0, 0)) return;
   mpz_split(u, &y);
 
   getNAFwidth(&naf[0], &u[0], GLV_W);
@@ -428,7 +549,7 @@ static inline void mulArray(_bn_mini_g2* z, const _bn_mini_g2* x, const mpz_clas
 
   Unit* y0 = mpz_getunit(y);
   size_t yn = mpz_realsize(y);
-  if (yn <= 1 && mulSmallInt(z, x, *y0, isNegative)) return;
+  if (yn <= 1 && g2_mulSmallInt(z, x, *y0, isNegative)) return;
 
   mpz_copy(&v, y0, yn);
 
