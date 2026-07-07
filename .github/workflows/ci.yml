@@ -19,7 +19,7 @@ jobs:
           - os: linux
             cpu: amd64
             platform: x64
-            builder: ubuntu-22.04
+            builder: ubuntu-latest
           - os: linux
             cpu: arm64
             platform: arm64
@@ -49,7 +49,7 @@ jobs:
       - name: Restore llvm-mingw (Windows) from cache
         if: runner.os == 'Windows'
         id: windows-mingw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: external/mingw-${{ matrix.target.cpu }}
           key: 'mingw-llvm-21-${{ matrix.target.cpu }}'
@@ -70,7 +70,7 @@ jobs:
       - name: Restore Nim DLLs dependencies (Windows) from cache
         if: runner.os == 'Windows'
         id: windows-dlls-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: external/dlls-${{ matrix.target.cpu }}
           key: 'dlls-${{ matrix.target.cpu }}'
@@ -101,7 +101,7 @@ jobs:
 
       - name: Restore prebuilt Nim from cache
         id: nim-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: NimBinCache
           key: 'nim-${{ matrix.target.os }}-${{ matrix.target.cpu }}-${{ steps.versions.outputs.nimbus_build_system }}'
