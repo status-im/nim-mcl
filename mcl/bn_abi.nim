@@ -19,6 +19,9 @@ export
 {.pragma: importbn, importc, header: headerPath & "/mcl/bn.h", gcsafe, raises:[].}
 {.pragma: bnheader, header: headerPath & "/mcl/bn.h".}
 
+# extra C ABI provided by this library rather than by mcl itself, see bn_ext.h
+{.pragma: importbnext, importc, header: projectPath & "/mcl/bn_ext.h", gcsafe, raises:[].}
+
 const
   MCLBN_FP_UNIT_SIZE = MCL_FP_BIT div 64
   MCLBN_FR_UNIT_SIZE = MCL_FR_BIT div 64
@@ -355,6 +358,9 @@ proc mclBnG2_isZero*(x: ptr BnG2): cint {.importbn.}
 
 # return 1 if x has a correct order
 proc mclBnG2_isValidOrder*(x: ptr BnG2): cint {.importbn.}
+
+# twisted Frobenius map on G2, y = Frobenius(x)
+proc mclBnG2_Frobenius*(y: ptr BnG2, x: ptr BnG2) {.importbnext.}
 
 proc mclBnG2_hashAndMapTo*(x: ptr BnG2, buf: pointer, bufSize: mclSize): cint {.importbn.}
 

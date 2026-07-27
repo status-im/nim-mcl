@@ -57,6 +57,9 @@ else:
 
 {.compile(srcPath & "/fp.cpp", "-fno-lto").}
 
+# C ABI for parts of the mcl C++ API that mcl/bn.h does not expose
+{.compile(projectPath & "/mcl/bn_ext.cpp", "-fno-lto").}
+
 type
   mclSize* = csize_t
   mclInt* = int64
